@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ project.title }} - {{ settings.name }}{% endblock %}
+{% block description %}{{ project.tagline }}{% endblock %}
+
+{% block content %}
+<!-- Project Hero -->
+<section class="project-hero">
+    <div class="container">
+        <a href="{% url 'core:home' %}#projects" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Projects
+        </a>
+
+        <div class="project-hero-content">
+            <div class="project-hero-info">
+                <span class="project-category-badge">{{ project.get_category_display }}</span>
+                <h1 class="project-hero-title">{{ project.title }}</h1>
+                <p class="project-hero-tagline">{{ project.tagline }}</p>
+
+                <div class="project-hero-actions">
+                    <a href="{{ project.live_url }}" target="_blank" rel="noopener" class="btn btn-primary">
+                        <i class="fas fa-external-link-alt"></i> View Live Demo
+                    </a>
+                    {% if project.github_url %}
+                    <a href="{{ project.github_url }}" target="_blank" rel="noopener" class="btn btn-secondary">
+                        <i class="fab fa-github"></i> View Source
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Screenshot Gallery -->
+<section class="project-gallery" x-data="{ currentSlide: 0, screenshots: {{ project.screenshots|safe }} }">
+    <div class="container">
+        <div class="gallery-main">
+            <img :src="screenshots[currentSlide] || '{{ project.thumbnail }}'" :alt="'{{ project.title }} screenshot'" class="gallery-image">
+
+            <button class="gallery-nav prev" @click="currentSlide = (currentSlide - 1 + screenshots.length) % screenshots.length" x-show="screenshots.length > 1">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="gallery-nav next" @click="currentSlide = (currentSlide + 1) % screenshots.length" x-show="screenshots.length > 1">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="gallery-thumbnails" x-show="screenshots.length > 1">
+            <template x-for="(img, index) in screenshots" :key="index">
+                <button class="thumbnail" :class="{ 'active': currentSlide === index }" @click="currentSlide = index">
+                    <img :src="img" :alt="'Thumbnail ' + (index + 1)">
+                </button>
+            </template>
+        </div>
+    </div>
+</section>
+
+<!-- Project Details -->
+<section class="project-details">
+    <div class="container">
+        <div class="details-grid">
+            <!-- Main Content -->
+            <div class="details-main">
+                <div class="details-section">
+                    <h2>About This Project</h2>
+                    <div class="project-description">
+                        {{ project.description|linebreaks }}
+                    </div>
+                </div>
+
+                {% if project.features %}
+                <div class="details-section">
+                    <h2>Key Features</h2>
+                    <ul class="features-list">
+                        {% for feature in project.features %}
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>{{ feature }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="details-sidebar">
+                <div class="sidebar-card">
+                    <h3>Tech Stack</h3>
+                    <div class="tech-stack-list">
+                        {% for tech in project.tech_stack %}
+                        <span class="tech-badge large">{{ tech }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3>Project Links</h3>
+                    <div class="sidebar-links">
+                        <a href="{{ project.live_url }}" target="_blank" rel="noopener" class="sidebar-link">
+                            <i class="fas fa-globe"></i>
+                            <span>Live Demo</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        {% if project.github_url %}
+                        <a href="{{ project.github_url }}" target="_blank" rel="noopener" class="sidebar-link">
+                            <i class="fab fa-github"></i>
+                            <span>GitHub Repository</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="sidebar-card cta-card">
+                    <h3>Interested in a Similar Project?</h3>
+                    <p>Let's discuss how I can help bring your ideas to life.</p>
+                    <a href="{% url 'core:home' %}#contact" class="btn btn-primary btn-full">
+                        <i class="fas fa-envelope"></i> Get In Touch
+                    </a>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<!-- Related Projects -->
+{% if related_projects %}
+<section class="related-projects">
+    <div class="container">
+        <h2 class="section-title">Related Projects</h2>
+        <div class="related-grid">
+            {% for related in related_projects %}
+            <article class="project-card small">
+                <div class="project-image">
+                    <img src="{{ related.thumbnail }}" alt="{{ related.title }}" loading="lazy">
+                    <div class="project-overlay">
+                        <a href="{% url 'core:project_detail' related.slug %}" class="overlay-btn">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </div>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">{{ related.title }}</h3>
+                    <p class="project-tagline">{{ related.tagline|truncatewords:10 }}</p>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
